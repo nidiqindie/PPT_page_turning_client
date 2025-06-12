@@ -1,0 +1,10 @@
+import sys
+
+import client_do
+import qdarkstyle
+from PySide6.QtWidgets import  QApplication
+app = QApplication(sys.argv)
+# app.setStyleSheet(qdarkstyle.load_stylesheet())
+my_ui=client_do.Client_UI()
+my_ui.show()
+app.exec()

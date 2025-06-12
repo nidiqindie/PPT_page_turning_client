@@ -1,0 +1,78 @@
+from PySide6.QtWidgets import QApplication, QMainWindow, QMessageBox, QWidget
+from PySide6.QtUiTools import QUiLoader
+import sys
+import os  # 添加路径处理
+from all_ui.ppt_client import Ui_Form
+class Client_UI(QWidget):
+    def __init__(self):  # 添加loader参数
+        super().__init__()
+        #使用ui文件动态创建窗口
+        # # 获取UI文件的绝对路径
+        # ui_path = os.path.join(os.path.dirname(__file__), "all_ui", "ppt_client.ui")
+        # # 加载UI文件
+        # self.ui = loader.load(ui_path)
+        # if not self.ui:
+        #     QMessageBox.critical(None, "错误", "无法加载UI文件")
+        #     sys.exit(1)
+        # self.setCentralWidget(self.ui)  # 设置中心部件
+        # self.setWindowTitle("ppt智能助手客户端")  # 设置窗口标题
+        # # self.ui.layout().activate()
+        # self.resize(300, 200)  # 设置为设计器中的尺寸
+
+        #使用py文件创建窗口
+        # 使用ui文件导入定义界面类
+        self.ui = Ui_Form()
+        # 初始化界面
+        self.ui.setupUi(self)
+        self.ui.Button1.setStyleSheet("""
+            QPushButton {
+                background: #4CAF50;
+                color: white;
+                border-radius: 5px;
+                font-weight: bold;
+            }
+            QPushButton:hover { background: #45a049; }
+        """)
+        self.ui.label1.setStyleSheet("""
+                    QLabel {
+                        background: #4CAF50;
+                        color: white;
+                        border-radius: 5px;
+                        font-weight: bold;
+                    }
+                    QLabel:hover { background: #45a049; }
+                """)
+        self.ui.Button1.clicked.connect(self.start_ppt)
+        # self.ui.label1.clicked.connect(self.check_running)
+        # self.ui.label2.clicked.connect(self.check_gesture)
+        # self.ui.label3.clicked.connect(self.check_workplace)
+
+    def start_ppt(self):
+
+        pass
+
+    def check_workplace(self):
+
+        pass
+    def check_gesture(self):
+
+        pass
+    def check_running(self):
+
+        pass
+
+
+# if __name__ == "__main__":
+#     #使用ui文件创建的时候
+#     # app = QApplication(sys.argv)
+#     # loader = QUiLoader()
+#     # # 创建Client实例时传入loader
+#     # window = Client(loader)
+#     # window.show()  # 显示主窗口对象（不是window.ui）
+#     # app.exec()
+#
+#     #使用py文件创建的时候
+#     app = QApplication(sys.argv)
+#     window = Client_UI()
+#     window.show()  # 显示主窗口对象（不是window.ui）
+#     app.exec()
