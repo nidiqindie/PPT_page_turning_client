@@ -5,7 +5,7 @@ import os  # 添加路径处理
 from all_ui.ppt_client_ui import Ui_Form
 from script import script
 from Focus_Detection import Focus_Detection
-
+from PySide6.QtCore import QMetaObject, Qt
 class Client_UI(QWidget):
     def __init__(self):  # 添加loader参数
         super().__init__()
@@ -102,6 +102,7 @@ class Client_UI(QWidget):
                 """
                 )
             self.ui.label3.setText(f"🟢 焦点离开 powerpoint！")
+        
     def start_ppt(self):
         """启动PPT监控功能"""
         if not hasattr(self, 'monitoring_started'):
@@ -118,7 +119,8 @@ class Client_UI(QWidget):
                 )
         else:
             self.ui.label1.setText("程序已在运行中")
-            
+  
+  
             
 
     def check_workplace(self):
@@ -151,17 +153,17 @@ class Client_UI(QWidget):
             # 接受关闭事件
             event.accept()
 
-if __name__ == "__main__":
-    #使用ui文件创建的时候
-    # app = QApplication(sys.argv)
-    # loader = QUiLoader()
-    # # 创建Client实例时传入loader
-    # window = Client(loader)
-    # window.show()  # 显示主窗口对象（不是window.ui）
-    # app.exec()
-    print("调试ui客户端");
-    #使用py文件创建的时候
-    app = QApplication(sys.argv)
-    window = Client_UI()
-    window.show()  # 显示主窗口对象（不是window.ui）
-    app.exec()
+# if __name__ == "__main__":
+#     #使用ui文件创建的时候
+#     # app = QApplication(sys.argv)
+#     # loader = QUiLoader()
+#     # # 创建Client实例时传入loader
+#     # window = Client(loader)
+#     # window.show()  # 显示主窗口对象（不是window.ui）
+#     # app.exec()
+#     print("调试ui客户端");
+#     #使用py文件创建的时候
+#     app = QApplication(sys.argv)
+#     window = Client_UI()
+#     window.show()  # 显示主窗口对象（不是window.ui）
+#     app.exec()
