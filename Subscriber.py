@@ -52,16 +52,7 @@ class Mqtt_Subscriber(QObject):
 
         # 连接MQTT代理
         self.connect()
-    def execute_command(command):
-        """执行命令对应的操作"""
-        if command in COMMAND_ACTIONS:
-            try:
-                COMMAND_ACTIONS[command]()
-                print(f"执行命令: {command}")
-            except Exception as e:
-                print(f"执行命令时出错: {e}")
-        else:
-            print(f"未知命令: {command}")
+  
     def start_to_connect(self):
         # 初始化MQTT订阅者
         mqtt_subscriber = Mqtt_Subscriber(
@@ -126,16 +117,7 @@ class Mqtt_Subscriber(QObject):
         command = msg.payload.decode('utf-8')
         print(f"收到命令: {command}")
         self.signal.emit(command)
-        # 执行命令
-        action = COMMAND_ACTIONS.get(command)
-        if action:
-            try:
-                return command
-            except Exception as e:
-                print(f"执行命令{command}出错: {e}")
-        else:
-            print(f"未知命令: {command}")
-
+       
 
     def on_subscribe(self, client, userdata, mid, granted_qos):
         self.logger.debug(f"订阅成功 (ID: {mid}, QoS: {granted_qos})")

@@ -83,6 +83,7 @@ class Client_UI(QWidget):
         self.detector.add_interrupt_target("POWERPNT.EXE")  # PowerPoint
         ############
         self.mqtt_client = None
+#焦点检测中断函数
     def interrupt_callback(self,event_type, process_name, window_info):
         """中断事件回调函数示例"""
         if event_type == 'enter':
@@ -109,7 +110,7 @@ class Client_UI(QWidget):
                 )
             self.in_ppt = False
             self.ui.label3.setText(f"🟢 焦点离开 powerpoint！")
-        
+    #启动整个功能
     def start_ppt(self):
         """启动PPT监控功能"""
         if not hasattr(self, 'monitoring_started'):
@@ -155,6 +156,7 @@ class Client_UI(QWidget):
             self.mqtt_client.signal.connect(self.gesture_callback)
         else:
             self.ui.label1.setText("程序已在运行中")
+    #手势检测回调函数
     def gesture_callback(self, event_type):
         if self.in_ppt:
             match event_type:
@@ -180,7 +182,7 @@ class Client_UI(QWidget):
                 case "5":
                     self.script.Right_sliding()
                     self.ui.label2.setText(f"🟢 右键")
-            
+    #析构函数
     def closeEvent(self, event):
         """程序关闭时的清理工作"""
         try:
