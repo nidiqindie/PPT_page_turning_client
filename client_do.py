@@ -6,6 +6,8 @@ from all_ui.ppt_client_ui import Ui_Form
 from script import script
 from Focus_Detection import Focus_Detection
 from PySide6.QtCore import QMetaObject, Qt
+from Subscriber import Mqtt_Subscriber
+import time
 class Client_UI(QWidget):
     def __init__(self):  # 添加loader参数
         super().__init__()
@@ -27,6 +29,8 @@ class Client_UI(QWidget):
         self.ui = Ui_Form()
         # 初始化界面
         self.ui.setupUi(self)
+        # 基础置顶设置
+        self.setWindowFlags(Qt.WindowStaysOnTopHint) # 窗口置顶
         self.ui.Button1.setStyleSheet("""
             QPushButton {
                 background: #4CAF50;
@@ -63,7 +67,7 @@ class Client_UI(QWidget):
                              font-weight: bold;
                          }
                      """)
-        
+        self.in_ppt = False
         
         self.ui.Button1.clicked.connect(self.start_ppt)
      
@@ -78,6 +82,7 @@ class Client_UI(QWidget):
          # 添加需要监听的目标进程（PowerPoint）
         self.detector.add_interrupt_target("POWERPNT.EXE")  # PowerPoint
         ############
+        self.mqtt_client = None
     def interrupt_callback(self,event_type, process_name, window_info):
         """中断事件回调函数示例"""
         if event_type == 'enter':
@@ -90,6 +95,7 @@ class Client_UI(QWidget):
                     }
                 """
                 )
+            self.in_ppt = True
             self.ui.label3.setText(f"🔴 目前焦点已在powerpoint中！")
         elif event_type == 'exit':
             print(f"🟢 焦点离开 powerpoint！")
@@ -101,6 +107,7 @@ class Client_UI(QWidget):
                     }
                 """
                 )
+            self.in_ppt = False
             self.ui.label3.setText(f"🟢 焦点离开 powerpoint！")
         
     def start_ppt(self):
@@ -108,6 +115,26 @@ class Client_UI(QWidget):
         if not hasattr(self, 'monitoring_started'):
             self.detector.start_monitoring()
             self.monitoring_started = True
+           
+            self.mqtt_client=Mqtt_Subscriber()
+            if not self.mqtt_client:
+                self.ui.label1.setText("程序启动失败！初始化MQTT失败！")
+                return False
+            # 等待MQTT连接
+            print("等待MQTT连接...")
+            connect_timeout = 10
+            start_time = time.time()
+            while not self.mqtt_client.connected:
+                time.sleep(0.5)
+                if time.time() - start_time > connect_timeout:
+                    self.ui.label1.setText("程序启动失败！连接超时！") # 连接超时
+                    return False
+
+            print(f"成功连接到MQTT代理: {self.mqtt_client.broker}:{self.mqtt_client.port}")
+            self.mqtt_client.subscribe(self.mqtt_client.topic)
+            print(f"已订阅主题: {self.mqtt_client.topic}")
+            self.mqtt_client.client.on_message = self.mqtt_client.on_message
+            self.mqtt_client.client.loop_start()
             self.ui.label1.setText("程序已启动！")
             self.ui.label1.setStyleSheet(
                 """
@@ -117,21 +144,43 @@ class Client_UI(QWidget):
                     }
                 """
                 )
+            self.ui.label2.setText("🟢 程序已启动！正在检测手势中")
+            self.ui.label3.setText("🎈 程序已启动！等待焦点移动至ppt窗口")
+            self.ui.label2.setStyleSheet("""
+                  QLabel {
+                        background: #4CAF50;
+                        border-radius: 5px;
+                    }
+                """)
+            self.mqtt_client.signal.connect(self.gesture_callback)
         else:
             self.ui.label1.setText("程序已在运行中")
-  
-  
+    def gesture_callback(self, event_type):
+        if self.in_ppt:
+            match event_type:
+                #向上翻
+                case "0":
+                    self.script.up_sliding()
+                    self.ui.label2.setText(f"🟢 向上翻页！")
+                #向下翻
+                case "1":
+                    self.script.down_sliding()
+                    self.ui.label2.setText(f"🟢 向下翻页！")
+                #放大一点
+                case "2":
+                    self.script.zoom_in()
+                    self.ui.label2.setText(f"🟢 放大！")
+                #缩小一点
+                case "3":
+                    self.script.zoom_out()
+                    self.ui.label2.setText(f"🟢 缩小！")
+                case "4":    
+                    self.script.Left_sliding()
+                    self.ui.label2.setText(f"🟢 左键")
+                case "5":
+                    self.script.Right_sliding()
+                    self.ui.label2.setText(f"🟢 右键")
             
-
-    def check_workplace(self):
-
-        pass
-    def check_gesture(self):
-
-        pass
-    def check_running(self):
-
-        pass
     def closeEvent(self, event):
         """程序关闭时的清理工作"""
         try:
@@ -144,7 +193,11 @@ class Client_UI(QWidget):
             # 清理其他资源
             if hasattr(self, 'script'):
                 del self.script
-                
+            if hasattr(self, 'mqtt_client') and self.mqtt_client:
+                print("🔄 正在断开MQTT连接...")
+                self.mqtt_client.disconnect()
+                print("✅ MQTT连接已断开")
+                pass
             print("🔚 程序资源清理完成")
             
         except Exception as e:

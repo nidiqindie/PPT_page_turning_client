@@ -222,6 +222,49 @@ class Focus_Detection():
                 self.monitor_process.join(timeout=2)  # 等待进程结束
                 if self.monitor_process.is_alive():
                     self.monitor_process.kill()  # 强制结束
+    def __del__(self):
+        """析构函数，确保在对象销毁时正确清理所有资源"""
+        try:
+            # 停止中断处理线程
+            if hasattr(self, 'interrupt_thread_running'):
+                self.interrupt_thread_running = False
+            
+            if hasattr(self, 'interrupt_thread') and self.interrupt_thread:
+                if self.interrupt_thread.is_alive():
+                    self.interrupt_thread.join(timeout=1)
+            
+            # 停止监测进程
+            if hasattr(self, 'monitor_process') and self.monitor_process:
+                if self.monitor_process.is_alive():
+                    self.monitor_process.terminate()
+                    self.monitor_process.join(timeout=2)
+                    if self.monitor_process.is_alive():
+                        self.monitor_process.kill()
+            
+            # 清理队列资源
+            if hasattr(self, 'info_queue') and self.info_queue:
+                try:
+                    while not self.info_queue.empty():
+                        self.info_queue.get_nowait()
+                except:
+                    pass
+                
+            if hasattr(self, 'interrupt_queue') and self.interrupt_queue:
+                try:
+                    while not self.interrupt_queue.empty():
+                        self.interrupt_queue.get_nowait()
+                except:
+                    pass
+                
+            # 重置状态标志
+            if hasattr(self, 'running'):
+                self.running = False
+            
+            print("Focus_Detection 对象已销毁，所有资源已清理")
+            
+        except Exception as e:
+            # 在析构函数中避免抛出异常
+            print(f"销毁 Focus_Detection 对象时出错: {e}")
 
 
 if __name__ == "__main__":

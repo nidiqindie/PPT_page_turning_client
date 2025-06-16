@@ -1,10 +1,26 @@
 import sys
-
 import client_do
 import qdarkstyle
 import os
-from PySide6.QtWidgets import  QApplication
+from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QIcon
+import paho.mqtt.client as mqtt
+import pyautogui
+import time
+from Subscriber import Mqtt_Subscriber
+from PySide6.QtCore import QThread, Signal
+
+
+"""
+
+ # 初始化MQTT
+    mqtt_subscriber = Mqtt_Subscriber()
+    if not mqtt_subscriber:
+        sys.exit(1)
+
+"""
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
